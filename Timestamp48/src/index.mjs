@@ -3,11 +3,6 @@
  * with Base64URL encoding for maximum performance and URL safety
  * ES Module version
  */
-
-/**
- * High-performance 48-bit timestamp generator following UUIDv7 standard
- * with Base64URL encoding for maximum performance and URL safety
- */
 export class Timestamp48Error extends Error {
   constructor(message, code = 'TIMESTAMP48_ERROR') {
     super(message);
@@ -16,11 +11,15 @@ export class Timestamp48Error extends Error {
   }
 }
 
+/**
+ * Provides high-performance, 48-bit, sortable, and URL-safe timestamps.
+ * Based on the UUIDv7 standard, encoded in Base64URL for efficiency.
+ */
 export class Timestamp48 {
   // Pre-allocated buffers for zero-allocation hot path
   static _buffer = Buffer.allocUnsafe(6);
   static _lastMs = 0;
-  static _counter = 0;
+  static _lastCounter = 0;
 
   // Base64URL character lookup table (URL-safe)
   static _encodeTable =
@@ -42,21 +41,38 @@ export class Timestamp48 {
   }
 
   /**
-   * Generate single 48-bit timestamp ID with maximum performance
-   * @returns {string} Base64URL encoded 8-character timestamp
+   * Generates a single, high-resolution 48-bit timestamp.
+   * This method is optimized for performance and guarantees monotonicity.
+   *
+   * @returns {string} An 8-character, Base64URL-encoded timestamp.
    */
   static generate() {
     const startTime = process.hrtime.bigint();
 
-    let now = Date.now();
+    const now = Date.now();
 
-    // Ensure we have a unique timestamp by incrementing if collision occurs
-    if (now <= this._lastMs) {
-      now = this._lastMs + 1;
+    if (now === this._lastMs) {
+      // Same millisecond - use counter (max 12 bits = 4095)
+      this._lastCounter++;
+      if (this._lastCounter > 0xfff) {
+        // Counter overflow - advance timestamp by 1ms and reset counter
+        this._lastMs++;
+        this._lastCounter = 0;
+      }
+    } else if (now < this._lastMs) {
+      // Clock went backwards - continue from where we left off
+      this._lastMs++;
+      this._lastCounter = 0;
+    } else {
+      // Normal case - new millisecond
+      this._lastMs = now;
+      this._lastCounter = 0;
     }
 
-    this._lastMs = now;
-    const result = this._encodeTimestamp(now);
+    const result = this._encodeTimestampWithCounter(
+      this._lastMs,
+      this._lastCounter,
+    );
 
     // Update metrics
     const endTime = process.hrtime.bigint();
@@ -67,9 +83,11 @@ export class Timestamp48 {
   }
 
   /**
-   * High-performance batch generation
-   * @param {number} count Number of IDs to generate
-   * @returns {string[]} Array of Base64URL encoded timestamps
+   * Generates a batch of unique timestamps with high performance.
+   * Ensures that all timestamps within the batch are monotonic.
+   *
+   * @param {number} count The number of timestamps to generate.
+   * @returns {string[]} An array of 8-character, Base64URL-encoded timestamps.
    */
   static generateBatch(count) {
     if (count <= 0) return [];
@@ -109,9 +127,12 @@ export class Timestamp48 {
   }
 
   /**
-   * Decode Base64URL back to timestamp (optimized)
-   * @param {string} encoded Base64URL encoded timestamp
-   * @returns {number} Unix timestamp in milliseconds
+   * Decodes a Base64URL-encoded timestamp back into a Unix timestamp.
+   *
+   * @param {string} encoded The 8-character, Base64URL-encoded timestamp.
+   * @returns {number} The Unix timestamp in milliseconds.
+   * @throws {Timestamp48Error} If the encoded format is invalid.
+   * @throws {TypeError} If the input is not a string.
    */
   static decode(encoded) {
     if (typeof encoded !== 'string') {
@@ -161,10 +182,12 @@ export class Timestamp48 {
   }
 
   /**
-   * Performance-optimized comparison
-   * @param {string} a First timestamp ID
-   * @param {string} b Second timestamp ID
-   * @returns {number} -1, 0, or 1 for chronological ordering
+   * Compares two timestamps to determine their chronological order.
+   * This method uses a fast lexicographical comparison.
+   *
+   * @param {string} a The first Base64URL-encoded timestamp.
+   * @param {string} b The second Base64URL-encoded timestamp.
+   * @returns {number} Returns -1 if a < b, 1 if a > b, and 0 if they are equal.
    */
   static compare(a, b) {
     // Fast lexicographic comparison works for Base64URL timestamps
