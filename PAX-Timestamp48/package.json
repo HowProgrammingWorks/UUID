@@ -1,0 +1,62 @@
+{
+  "name": "@tools/uuid48-timestamp",
+  "version": "1.0.0",
+  "description": "Professional 48-bit timestamp generator for UUIDv7 compliance with Base64URL encoding - zero dependencies",
+  "main": "src/index.js",
+  "type": "module",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage tests/*.test.js",
+    "test:watch": "node --test --watch tests/*.test.js",
+    "benchmark": "node examples/benchmark.js",
+    "validate": "node examples/validation.js"
+  },
+  "keywords": [
+    "uuid",
+    "timestamp",
+    "base64url",
+    "uuid7",
+    "rfc9562",
+    "rfc4648",
+    "node.js",
+    "zero-dependencies",
+    "high-performance",
+    "monotonic",
+    "professional"
+  ],
+  "author": "Pavel Valentov",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "src/",
+    "types/",
+    "tests/",
+    "examples/",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./timestamp": {
+      "types": "./types/index.d.ts",
+      "import": "./src/timestamp.js"
+    },
+    "./base64url": {
+      "types": "./types/index.d.ts",
+      "import": "./src/base64url.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PavelValentov/UUID48"
+  },
+  "bugs": {
+    "url": "https://github.com/PavelValentov/UUID48/issues"
+  },
+  "homepage": "https://github.com/PavelValentov/UUID48#readme"
+}
