@@ -13,4 +13,10 @@ module.exports = [
       },
     },
   },
+  {
+    files: ['Timestamp48/test/performance.test.js'],
+    rules: {
+      'max-len': 'off',
+    },
+  },
 ];
