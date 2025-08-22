@@ -1,0 +1,35 @@
+{
+  "name": "base64-id-howprogrammingworks",
+  "version": "1.0.0",
+  "description": "High-performance 64-bit ID generator with Base64URL encoding for HowProgrammingWorks/UUID",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js",
+    "example": "node example.js",
+    "benchmark": "node -p \"const {generateId} = require('./index.js'); console.time('1M IDs'); for(let i=0; i<1000000; i++) generateId(); console.timeEnd('1M IDs');\""
+  },
+  "keywords": [
+    "uuid",
+    "id-generator", 
+    "base64url",
+    "timestamp",
+    "unique-id",
+    "performance",
+    "educational",
+    "howprogrammingworks"
+  ],
+  "author": "HowProgrammingWorks Contributors",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HowProgrammingWorks/UUID.git",
+    "directory": "Base64ID"
+  },
+  "bugs": {
+    "url": "https://github.com/HowProgrammingWorks/UUID/issues"
+  },
+  "homepage": "https://github.com/HowProgrammingWorks/UUID/tree/main/Base64ID"
+}
